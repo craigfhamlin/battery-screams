@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Battery Time</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-image: url("battery2.webp");
+        background-color: white;
+      }
+      #cover {
+        display: flex;
+      }
+      #batteryImg {
+        width: 100%;
+        height: auto;
+        background-color: white;
+      }
+      #percentage {
+        position: absolute;
+        bottom: 11%;
+        left: 34%;
+        width: 35%;
+        background-color: #ccc;
+        text-align: center;
+        font-size: 15px;
+        border-radius: 15px;
+      }
+      #incrementBtn {
+        position: absolute;
+        height: 1.5rem;
+        width: 5rem;
+        top: 17%;
+        left: 38%;
+        background-color: skyblue;
+        border-radius: 15px;
+        border: none;
+      }
+      .battery-box {
+        position: relative;
+        display: inline-block;
+        margin-right: 5.1rem;
+      }
+      .color-box {
+        position: relative;
+        width: 300px;
+        height: 325px;
+        background-color: green;
+        transition: all 0.5s ease;
+        border: 2px solid pink;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .color-box h2 {
+        text-align: center;
+      }
+
+      .pink-bg {
+        background-color: pink;
+      }
+      .red-bg {
+        background-color: red;
+      }
+      .green-bg {
+        background-color: green;
+      }
+      .fade-out {
+        opacity: 0;
+        transform: scale(0);
+      }
+    </style>
+  </head>
+  <body id="body" onclick="this.querySelector('audio').play()">
+    <audio controls autoplay style="display: none">
+      <source src="Screams.mp3" type="audio/mpeg" />
+    </audio>
+
+    <div id="cover">
+      <div class="battery-box">
+        <img id="batteryImg" src="battery.png" alt="Battery" />
+        <button id="incrementBtn">Charge me</button>
+        <div id="percentage">0%</div>
+      </div>
+      <div class="color-box">
+        <h2 id="text">START CHARGING!</h2>
+      </div>
+    </div>
+    <script>
+      const batteryImg = document.getElementById("batteryImg");
+      const incrementBtn = document.getElementById("incrementBtn");
+      const percentageDiv = document.getElementById("percentage");
+      const colorBox = document.querySelector(".color-box");
+      const text = document.getElementById("text");
+      let percentage = 0;
+      let intervalId;
+
+      function startCounting() {
+        intervalId = setInterval(() => {
+          percentage += 10;
+          if (percentage > 1000) {
+            percentage = 1000;
+            const stu = document.getElementById("body");
+            stu.style.backgroundImage = "url('battery-overcharge.png')";
+
+            stopCounting();
+            percentageDiv.textContent = "1000%";
+            text.textContent = "BATTERY OVERCHARGED!!!";
+            const allElements = document.querySelectorAll("*");
+            allElements.forEach((elem) => {
+              elem.style.transition = "all 4s ease-in-out";
+              elem.style.opacity = "0";
+              elem.style.transform = "scale(1.5)";
+            });
+          } else if (percentage === 0) {
+            percentageDiv.textContent = "0%";
+            colorBox.classList.remove("pink-bg", "red-bg");
+            colorBox.classList.add("green-bg");
+            text.textContent = "OKAY LET'S GO!";
+          } else {
+            percentageDiv.textContent = `${percentage}%`;
+            if (percentage >= 400 && percentage < 600) {
+              colorBox.classList.add("pink-bg");
+              colorBox.classList.remove("red-bg", "green-bg");
+              text.textContent = "IT'S TOO FAST!!!";
+            } else if (percentage >= 1000) {
+              colorBox.classList.add("red-bg");
+              colorBox.classList.remove("pink-bg", "green-bg");
+            } else if (percentage >= 250 && percentage < 400) {
+              text.textContent = "BETTER SLOW DOWN!!";
+            } else if (percentage >= 600 && percentage < 800) {
+              text.textContent = "WHAT THE FREAK!!";
+            } else if (percentage >= 800 && percentage < 1000) {
+              text.textContent = "HELP ME!!HELP ME!!";
+            } else {
+              colorBox.classList.remove("pink-bg", "red-bg", "green-bg");
+              text.textContent = "NOW CHARGING";
+            }
+          }
+        }, 23);
+      }
+
+      function stopCounting() {
+        clearInterval(intervalId);
+        intervalId = null;
+
+        if (percentage >= 1000) {
+          let start = null;
+          let duration = 3000; // 4 seconds
+          const step = (timestamp) => {
+            if (!start) {
+              start = timestamp;
+            }
+            const progress = timestamp - start;
+            const scale = 1 + (progress / duration) * 0.5;
+            const opacity = 1 - progress / duration;
+
+            const elements = document.querySelectorAll("*");
+            elements.forEach((element) => {
+              element.style.transform = `scale(${scale})`;
+              element.style.opacity = opacity;
+            });
+
+            if (progress < duration) {
+              window.requestAnimationFrame(step);
+            }
+          };
+          window.requestAnimationFrame(step);
+        }
+      }
+
+      incrementBtn.addEventListener("click", () => {
+        if (intervalId) {
+          stopCounting();
+        } else {
+          startCounting();
+        }
+      });
+    </script>
+  </body>
+</html>
